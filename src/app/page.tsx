@@ -2,6 +2,27 @@ import { Code, Brain, LineChartIcon as ChartLine } from "lucide-react";
 import { GradientText } from "@/components/ui/gradient-text";
 
 export default function Home() {
+  const items = [
+    {
+      icon: <ChartLine className="w-8 h-8 mb-4 text-blue-400" />,
+      title: "Storytelling Drives Capital Flow",
+      description:
+        "We believe in the power of narratives to shape investment decisions.",
+    },
+    {
+      icon: <Code className="w-8 h-8 mb-4 text-purple-400" />,
+      title: "Commoditized Development",
+      description:
+        "Software development has become streamlined through AI-powered tools.",
+    },
+    {
+      icon: <Brain className="w-8 h-8 mb-4 text-pink-400" />,
+      title: "First Principles Thinking",
+      description:
+        "True advantage lies in combining elements with proprietary data.",
+    },
+  ]
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-gray-900 text-foreground">
       <main className="container mx-auto px-4 py-16 max-w-[960px]">
@@ -15,29 +36,11 @@ export default function Home() {
         </section>
 
         <section className="grid md:grid-cols-3 gap-8 mb-24">
-          {[
-            {
-              icon: <ChartLine className="w-8 h-8 mb-4 text-blue-400" />,
-              title: "Storytelling Drives Capital Flow",
-              description:
-                "We believe in the power of narratives to shape investment decisions.",
-            },
-            {
-              icon: <Code className="w-8 h-8 mb-4 text-purple-400" />,
-              title: "Commoditized Development",
-              description:
-                "Software development has become streamlined through AI-powered tools.",
-            },
-            {
-              icon: <Brain className="w-8 h-8 mb-4 text-pink-400" />,
-              title: "First Principles Thinking",
-              description:
-                "True advantage lies in combining elements with proprietary data.",
-            },
-          ].map((tenet, index) => (
+          {items.map((tenet, index) => (
             <div
-              key={index}
-              className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl text-center animate-fade-in-delay-3 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-1 relative flex flex-col justify-center min-h-[200px]"
+              key={`${tenet.title}-${index}`}
+              suppressHydrationWarning
+              className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl text-center border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-1 relative flex flex-col justify-center min-h-[200px] motion-safe:animate-fade-in"
             >
               <div className="absolute top-4 left-4">{tenet.icon}</div>
               <div className="mt-4">

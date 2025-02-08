@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../util/axios";
 
 type UserProfile = {
   username: string;
@@ -17,7 +18,7 @@ export default function Settings() {
   useEffect(() => {
     const getProfile = async () => {
       try {
-        const res = await fetch("/api/profile", {
+        const res = await api.get("/profile", {
           method: "GET",
           headers: { 
             "Content-Type": "application/json",
@@ -25,12 +26,12 @@ export default function Settings() {
           },
         });
 
-        if (!res.ok) {
+        if (res.status !== 200) {
           setError("Failed to fetch profile");
           return;
         }
 
-        const data = await res.json();
+        const data = await res.data;
         setProfile(data);
         setError(null);
       } catch (err) {
