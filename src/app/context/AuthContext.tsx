@@ -1,38 +1,80 @@
-'use client';
-
-import { createContext, useContext, useState} from 'react';
+"use client";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
+import { useRouter } from "next/navigation";
 
 type AuthContextType = {
-    authToken: string | null;
-    login: (token: string) => void;
-    logout: () => void;
-}
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+};
 
 const AuthContext = createContext<AuthContextType>({
-    authToken: null,
-    login: () => {},
-    logout: () => {},
+  login: async () => {},
+  logout: async () => {},
+  isAuthenticated: false,
+  isLoading: true,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [authToken, setAuthToken] = useState<string | null>(null);
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-    const login = (token: string) => setAuthToken(token);
-    const logout = () => setAuthToken(null);
+  useEffect(() => {
+    const checkAuth = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/auth/check");
+        const isAuthed = await res.json();
+        setIsAuthenticated(isAuthed.authenticated);
+      } catch (error) {
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
-    return (
-        <AuthContext.Provider
-          value={{ authToken, login, logout }}
-        >
-          {children}
-        </AuthContext.Provider>
-      );
+  const login = useCallback(
+    async (username: string, password: string) => {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password}),
+      });
+
+      if (!res.ok) {
+          console.log('res', res)
+        throw new Error("Login failed");
+      }
+
+      setIsAuthenticated(true);
+      router.push("/dashboard");
+    },
+    [router],
+  );
+
+  const logout = useCallback(async () => {
+    await fetch("/api/logout", { method: "POST" });
+    setIsAuthenticated(false);
+    router.push("/login");
+  }, [router]);
+
+  return (
+    <AuthContext.Provider value={{ login, logout, isAuthenticated, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  return useContext(AuthContext);
 }

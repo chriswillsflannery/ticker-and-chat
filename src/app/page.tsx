@@ -1,18 +1,19 @@
 "use client";
-
-import { Code, Brain, LineChartIcon as ChartLine } from "lucide-react"
-import { GradientText } from "@/components/ui/gradient-text"
+import { Code, Brain, LineChartIcon as ChartLine } from "lucide-react";
+import { GradientText } from "@/components/ui/gradient-text";
 import { useAuth } from "./context/AuthContext";
 import { redirect } from "next/navigation";
 
 export default function Home() {
-  // if user is already logged in, redirect to /dashboard
-  const { authToken } = useAuth();
-  if (authToken) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isAuthenticated) {
     redirect("/dashboard");
   }
 
-  return (
+  return isLoading ? (
+    <></>
+  ) : (
     <div className="min-h-screen bg-gradient-to-b from-background to-gray-900 text-foreground">
       <main className="container mx-auto px-4 py-16 max-w-[960px]">
         <section className="text-center my-24">
@@ -29,28 +30,31 @@ export default function Home() {
             {
               icon: <ChartLine className="w-8 h-8 mb-4 text-blue-400" />,
               title: "Storytelling Drives Capital Flow",
-              description: "We believe in the power of narratives to shape investment decisions.",
+              description:
+                "We believe in the power of narratives to shape investment decisions.",
             },
             {
               icon: <Code className="w-8 h-8 mb-4 text-purple-400" />,
               title: "Commoditized Development",
-              description: "Software development has become streamlined through AI-powered tools.",
+              description:
+                "Software development has become streamlined through AI-powered tools.",
             },
             {
               icon: <Brain className="w-8 h-8 mb-4 text-pink-400" />,
               title: "First Principles Thinking",
-              description: "True advantage lies in combining elements with proprietary data.",
+              description:
+                "True advantage lies in combining elements with proprietary data.",
             },
           ].map((tenet, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl text-center animate-fade-in-delay-3 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-1 relative flex flex-col justify-center min-h-[200px]"
             >
-              <div className="absolute top-4 left-4">
-                {tenet.icon}
-              </div>
+              <div className="absolute top-4 left-4">{tenet.icon}</div>
               <div className="mt-4">
-                <h3 className="text-xl font-semibold mb-3 text-gray-100">{tenet.title}</h3>
+                <h3 className="text-xl font-semibold mb-3 text-gray-100">
+                  {tenet.title}
+                </h3>
                 <p className="text-gray-300">{tenet.description}</p>
               </div>
             </div>
@@ -64,6 +68,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
-

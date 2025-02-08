@@ -1,15 +1,20 @@
-"use client";
-import { useAuth } from "../context/AuthContext";
+'use client';
 import { redirect } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
 
 export default function Dashboard() {
-  const context = useAuth();
-  console.log(context);
-  if (!context.authToken) {
-    redirect("/");
-  }
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  useEffect(() => {
+    if (isLoading) return;
 
-  return (
+    if (!isAuthenticated) {
+      redirect("/");
+    }
+  }, [isAuthenticated, isLoading]);
+
+  return isLoading ? <></> : (
     <div className="min-h-screen bg-gradient-to-b from-background to-gray-900 text-foreground">
       a little dashboard will do ya
     </div>
