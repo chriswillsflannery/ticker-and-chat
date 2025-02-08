@@ -1,6 +1,5 @@
 // app/api/login/route.ts
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 
 export async function POST(request: Request) {
   const { username, password } = await request.json();
@@ -12,7 +11,6 @@ export async function POST(request: Request) {
   formData.append("username", username);
   formData.append("password", password);
 
-  // Forward the login request to your Python API
   const apiRes = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/challenge/api/login`,
     {
@@ -36,19 +34,18 @@ export async function POST(request: Request) {
     );
   }
 
+  // python server returns access_token and refresh_token as jwt
   const data = await apiRes.json();
-  const accessToken = jwt.sign({ username, isAdmin }, process.env.JWT_ACCESS_SECRET!, {
-    expiresIn: "5min",
+
+  const response = NextResponse.json({ 
+    success: true, 
+    accessToken: data.access_token,
+    isAdmin 
   });
-
-  const refreshToken = jwt.sign({ username, isAdmin }, process.env.JWT_REFRESH_SECRET!, {
-    expiresIn: "5min",
-  })
-
-  const response = NextResponse.json({ success: true, accessToken, isAdmin });
+  
   response.cookies.set("refresh_token", data.refresh_token, {
     name: "refresh_token",
-    value: refreshToken,
+    value: data.refresh_token,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",

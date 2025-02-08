@@ -54,12 +54,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       if (isAuthenticated) return;
 
+      console.log("is here checkAuth", accessToken);
+
       try {
         const res = await fetch("/api/auth/check", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ accessToken }),
         });
+
+        console.log("checkauth res", res);
 
         if (!res.ok) {
             throw new Error("Check auth failed");
