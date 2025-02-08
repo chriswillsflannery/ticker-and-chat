@@ -1,10 +1,8 @@
 // app/api/refresh/route.ts
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refresh_token")?.value;
+  const { refreshToken } = await request.json();
 
   if (!refreshToken) {
     return NextResponse.json(
@@ -34,7 +32,7 @@ export async function POST(request: Request) {
 
   const data = await apiRes.json();
 
-  const response = NextResponse.json({ success: true });
+  const response = NextResponse.json({ success: true, accessToken: data.access_token });
   response.cookies.set("refresh_token", data.refresh_token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

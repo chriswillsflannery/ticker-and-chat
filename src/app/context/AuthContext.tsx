@@ -14,6 +14,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
+  accessToken: string | null;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   isAdmin: false,
+  accessToken: null,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -32,29 +34,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const getRefreshToken = async (refreshToken: string) => {
-        console.log("is here refreshToken", refreshToken);
+    const getNewAccessToken = async (refreshToken: string) => {
         const res = await fetch("/api/refresh", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refreshToken }),
         });
 
-        console.log("res", res);
-
         if (!res.ok) {
             throw new Error("Refresh token failed");
         }
 
         const data = await res.json();
-        console.log("data", data);
+
+        setAccessToken(data.accessToken);
+        setIsAuthenticated(true);
     }
 
     const checkAuth = async () => {
       setIsLoading(true);
       if (isAuthenticated) return;
-
-      console.log("is here checkAuth", accessToken);
 
       try {
         const res = await fetch("/api/auth/check", {
@@ -63,14 +62,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             body: JSON.stringify({ accessToken }),
         });
 
-        console.log("checkauth res", res);
-
         if (!res.ok) {
             throw new Error("Check auth failed");
         }
 
         const data = await res.json();
-        const { isAuthenticated, isAdmin, refreshToken } = data;
+        const { refreshToken } = data;
 
         if (!refreshToken) {
             // user is not authenticated
@@ -79,14 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return;
         }
 
-        if (isAuthenticated) {
-            setIsAuthenticated(true);
-            setIsAdmin(isAdmin);
-        } else {
-            // try refresh
-            console.log('passing refresh token', refreshToken);
-            getRefreshToken(refreshToken);
-        }
+        getNewAccessToken(refreshToken)
       } catch (error) {
         setIsAuthenticated(false);
       } finally {
@@ -127,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ login, logout, isAuthenticated, isLoading, isAdmin }}>
+    <AuthContext.Provider value={{ login, logout, isAuthenticated, isLoading, isAdmin, accessToken }}>
       {children}
     </AuthContext.Provider>
   );
