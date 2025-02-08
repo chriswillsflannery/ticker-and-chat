@@ -1,8 +1,12 @@
 // app/api/login/route.ts
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 export async function POST(request: Request) {
   const { username, password } = await request.json();
+
+  // in practice this would actually be a boolean value on user record in db
+  const isAdmin = username === "admin_user";
 
   const formData = new FormData();
   formData.append("username", username);
@@ -33,23 +37,22 @@ export async function POST(request: Request) {
   }
 
   const data = await apiRes.json();
-
-  // data should include access_token and refresh_token.
-  // Set your tokens as cookies. These options can be adjusted
-  // based on your security and expiration requirements.
-  const response = NextResponse.json({ success: true });
-  response.cookies.set("access_token", data.access_token, {
-    httpOnly: true, // not accessible on the client
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60, // e.g., 1 hour
+  const accessToken = jwt.sign({ username, isAdmin }, process.env.JWT_ACCESS_SECRET!, {
+    expiresIn: "5min",
   });
 
+  const refreshToken = jwt.sign({ username, isAdmin }, process.env.JWT_REFRESH_SECRET!, {
+    expiresIn: "5min",
+  })
+
+  const response = NextResponse.json({ success: true, accessToken, isAdmin });
   response.cookies.set("refresh_token", data.refresh_token, {
+    name: "refresh_token",
+    value: refreshToken,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30, // e.g., 30 days
+    maxAge: 60 * 15, // e.g., 15 minutes
   });
 
   return response;
