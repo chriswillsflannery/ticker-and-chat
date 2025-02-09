@@ -40,6 +40,14 @@ Authentication and Authorization when done well should take _much_ more time and
 
 I don't have the secret key for the refresh token which signed in in the python server, so I can't verify the signature of the refresh token. I can only decode the payload. In production, you would definitely want to use either `jsonwebtoken or jose etc.` to verify the signature.
 
+**Double Fetch**
+
+Network request triggered by useEffect are firing twice. I think this is due to Strict Mode in React which fires useEffects twice in development, so it's expected. (I think).
+
+**Meta is everywhere!**
+
+All tickers seem to have a lot of the same metadata (get it? Meta? data? ha) including the `logo_url` in s3.
+
 ---
 
 For a weekend of hacking, I'm satisfied with this. It's messy, and there are likely some edge cases yet to be discovered. I would NOT ship this as-is in production - I would like to more thoroughly look at how solutions like `BetterAuth` handle all of the edge cases first.

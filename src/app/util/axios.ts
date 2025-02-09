@@ -22,7 +22,6 @@ api.interceptors.response.use(
         const {
           data: { success, accessToken },
         } = await api.post("/refresh", {
-          headers: { "Content-Type": "application/json" },
           data: { refreshToken },
         });
 

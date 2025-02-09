@@ -3,6 +3,9 @@ from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta
 import jwt 
 
+# NOTE - Please treat this as pseudocode.
+# This is just a "best guess".
+
 app = FastAPI()
 
 # secret for signing jwt, which crucially, I don't have access to in my app
@@ -102,7 +105,6 @@ async def refresh_token_endpoint(data: RefreshRequest):
     )
     json_response.set_cookie(key="refresh_token", value=new_refresh_token, httponly=True)
     return json_response
-
 
 @app.get("/challenge/api/profile")
 async def get_profile(request: Request):

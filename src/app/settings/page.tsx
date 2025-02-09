@@ -16,6 +16,8 @@ export default function Settings() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!accessToken) return;
+
     const getProfile = async () => {
       try {
         const res = await api.get("/profile", {
@@ -42,7 +44,6 @@ export default function Settings() {
 
     getProfile();
   }, [accessToken])
-
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-gray-900 text-foreground">
