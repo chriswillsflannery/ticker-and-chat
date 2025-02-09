@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -58,6 +58,7 @@ interface TickerMetadata {
 }
 
 interface TickerResponse {
+	ticker: string;
   price_action: PriceAction[];
   ticker_metadata: TickerMetadata;
   ticker_details: any;
@@ -120,7 +121,65 @@ export default function DashboardUI() {
     });
   };
 
-  console.log("tickerData", tickerData);
+	const PriceChart = () => {
+		return (
+			<Card className="bg-card shadow-lg">
+				<CardHeader className="space-y-1 pb-4">
+					<CardTitle className="text-xl font-semibold tracking-tight">Price History</CardTitle>
+					<p className="text-sm text-muted-foreground">
+						Historical price movement over time
+					</p>
+				</CardHeader>
+				<CardContent>
+					<div className="h-96 w-full">
+						<ResponsiveContainer width="100%" height="100%">
+						<AreaChart
+              data={tickerData.price_action}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="rgb(34 197 94)" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="rgb(34 197 94)" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <XAxis 
+                dataKey="timestamp"
+                tickFormatter={formatDate}
+                stroke="#71717a"
+                className="text-xs"
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="#71717a"
+                className="text-xs"
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => `$${value.toLocaleString()}`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "white",
+                  borderColor: "#e4e4e7",
+                  borderRadius: "0.5rem",
+                }}
+                labelClassName="text-zinc-500"
+              />
+              <Area
+                type="monotone"
+                dataKey="close"
+                stroke="rgb(34 197 94)"
+                fill="url(#colorGradient)"
+                strokeWidth={2}
+              />
+            </AreaChart>
+						</ResponsiveContainer>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	};
 
   const SecFilings = () =>
     tickerData?.ticker_details?.secFilings ? (
@@ -153,16 +212,17 @@ export default function DashboardUI() {
           <SelectTrigger className="w-[300px]">
             <SelectValue placeholder="Select a ticker" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-background">
             {MAG7_TICKERS.map((ticker) => (
-              <SelectItem key={ticker.value} value={ticker.value}>
+              <SelectItem className="bg-background cursor-pointer" key={ticker.value} value={ticker.value}>
                 {ticker.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        {tickerData && (
+				{loading && <h3>Beautiful skeleton loaders coming soon...</h3>}
+        {tickerData && !loading && (
           <>
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 relative">
@@ -177,7 +237,7 @@ export default function DashboardUI() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold">
-                  {tickerData.ticker_metadata.symbol}
+                  {tickerData.ticker}
                 </h1>
                 <p className="text-muted-foreground">
                   {tickerData.ticker_metadata.tv_exchange}
@@ -226,31 +286,7 @@ export default function DashboardUI() {
               </Card>
             </div>
 
-            <Card className="p-4">
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={tickerData.price_action}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <XAxis
-                      dataKey="timestamp"
-                      tickFormatter={formatDate}
-                      stroke="hsl(var(--muted-foreground))"
-                    />
-                    <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="close"
-                      stroke="hsl(var(--primary))"
-                      fill="hsl(var(--primary))"
-                      fillOpacity={0.2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
+            <PriceChart />
 
             <Card>
               <Table>

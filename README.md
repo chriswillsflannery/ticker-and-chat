@@ -24,6 +24,14 @@ I've used NextJS middleware to automatically re-route users to public and privat
 
 Please see `PYTHON_SERVER.py` for some pseudo code that is my best guess at what the python api layer might look like, roughly.
 
+**Dashboard/ticker infos**
+
+Let's make the chart the star of the show. Big, bold, unabashed.
+
+An obvious enhancement here would be to open some kind of socket connection to get real-time streaming data. But there are certainly some things here which can be easy perf enhancement grabs too, like caching images (maybe Next already does this behind the scenes?)
+
+This would also be a great place to think about some optimistic UI patterns. For example, when I select a new ticker from the dropdown, I shouldn't have to wait for the network query to complete - the new ticker value should immediately populate the "title".
+
 # Caveats / weird things
 
 **NextJS auth proxy server**
