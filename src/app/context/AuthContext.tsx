@@ -7,6 +7,7 @@ import {
   useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
+import { api, useAxiosInterceptors } from "../util/axios";
 
 type AuthContextType = {
   login: (username: string, password: string) => Promise<void>;
@@ -33,6 +34,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  useAxiosInterceptors({
+    api,
+    accessToken,
+    setAccessToken,
+    onRefreshError: () => router.push("/login")
+  });
+
+  // re-fetch data on page refresh
   useEffect(() => {
     const getNewAccessToken = async (refreshToken: string) => {
         const res = await fetch("/api/refresh", {
