@@ -55,12 +55,12 @@ If the prompt mentions any ticker outside of [${MAG7.join(
       },
     });
 
-    const { textStream, steps } = streamText({
+    const { textStream } = streamText({
       model: aisdkOpenai("gpt-4"),
       messages: [systemMessage, ...messages],
       tools: { fetchSummary: fetchSummaryTool },
       maxSteps: 5,
-      onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
+      onStepFinish({ text, toolCalls, toolResults }) {
         console.log("Step finished:", { text, toolCalls, toolResults });
       },
     });

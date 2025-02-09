@@ -59,11 +59,22 @@ interface TickerMetadata {
   tv_exchange: string;
 }
 
+type Filing = {
+	title: string
+	date: string
+	type: string
+	edgarUrl: string
+}
+
 interface TickerResponse {
   ticker: string;
   price_action: PriceAction[];
   ticker_metadata: TickerMetadata;
-  ticker_details: any;
+  ticker_details: {
+		secFilings: {
+			filings: Filing[]
+		}
+	};
 }
 
 export default function DashboardUI() {
@@ -205,7 +216,7 @@ export default function DashboardUI() {
   const SecFilings = () =>
     tickerData?.ticker_details?.secFilings ? (
       tickerData?.ticker_details?.secFilings?.filings?.map(
-        (filing: any, index: number) => (
+        (filing: Filing, index: number) => (
           <TableRow key={index}>
             <TableCell>{new Date(filing.date).toLocaleDateString()}</TableCell>
             <TableCell>{filing.type}</TableCell>

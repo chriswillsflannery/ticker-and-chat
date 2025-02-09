@@ -1,9 +1,8 @@
 import LoadingBubble from "@/components/LoadingBubble";
 import PromptSuggestionsRow from "@/components/PrompSuggestionsRow";
 import Bubble from "@/components/Bubble";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { api } from "../util/axios";
 
 interface Message {
   role: "user" | "assistant";
