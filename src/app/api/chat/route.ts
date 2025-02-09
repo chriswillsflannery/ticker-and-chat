@@ -12,6 +12,8 @@ export async function POST(req: Request) {
       ? "http://localhost:3000"
       : "";
 
+	console.log('baseUrl: ', baseUrl)
+
   try {
     const { messages, accessToken } = await req.json();
     const latestMessage = messages[messages.length - 1]?.content || "";
@@ -43,6 +45,7 @@ If the prompt mentions any ticker outside of [${MAG7.join(
         })
         .strict(),
       execute: async ({ ticker }, { abortSignal }) => {
+				console.log('attempting tool call: ', `${baseUrl}/api/summary`);
         const res = await fetch(`${baseUrl}/api/summary`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
