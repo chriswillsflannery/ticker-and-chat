@@ -20,7 +20,6 @@ export async function POST(request: Request) {
   );
 
   if (!apiRes.ok) {
-    // Add error logging
     const errorData = await apiRes.text();
     console.error("Login failed:", {
       status: apiRes.status,

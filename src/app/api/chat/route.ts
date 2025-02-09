@@ -15,65 +15,62 @@ export async function POST(req: Request) {
     const { messages, accessToken } = await req.json();
     const latestMessage = messages[messages.length - 1]?.content || "";
 
-    // check if latest message contains mention of MAG7
+    // MAG7 tickers mentioned in user prompt
     const mentionedTickers = MAG7.filter((ticker) =>
       new RegExp(`\\b${ticker}\\b`, "i").test(latestMessage),
     );
-
-    // tool which can fetch summary details
-    const fetchSummaryTool = tool({
-      description:
-        "Fetch summary details for a given ticker from the /api/summary route. " +
-        "Only call this tool when the user's prompt contains a MAG7 ticker.",
-      parameters: z
-        .object({
-          ticker: z.string().describe("Ticker symbol to fetch summary for"),
-        })
-        .strict(),
-      execute: async ({ ticker }) => {
-				console.log("beginning execute")
-        const res = await fetch(`${baseUrl}/api/summary`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ accessToken, ticker }),
-        });
-        if (!res.ok) {
-          throw new Error(`Error fetching summary for ticker ${ticker}`);
-        }
-        const data = await res.json();
-				console.log('finishing execute, ', data)
-        return data;
-      },
-    });
 
     const systemMessage = {
       role: "system",
       content: `You are an AI assistant tasked with answering user queries.
 The user's prompt mentioned these tickers: ${mentionedTickers.join(
         ", ",
-      )}, for each ticker mentioned, call the fetchSummary tool to retrieve up-to-date summary details and
-integrate that information seamlessly into your response. For multiple ticker
-mentions, make sure to fetch and clearly separate the relevant summaries in your answer.
-If the user's prompt mentions a ticker which is NOT part of the MAG7 list: [${MAG7.join(", ")}],
-Apologize profusely, and say that you only know about MAG7 tickers.`,
+      )}. For each ticker mentioned, call the fetchSummary tool to retrieve up‑to‑date summary details and integrate that information into your response.
+If the prompt mentions any ticker outside of [${MAG7.join(
+        ", ",
+      )}], apologize and mention that you only have information on MAG7 tickers.`,
     };
+
+    // Fetch call may take ~20 seconds swe forward any abortSignal from the SDK for cancellation if needed.
+    const fetchSummaryTool = tool({
+      description:
+        "Fetch summary details for a given ticker from the /api/summary route. " +
+        "Call this tool only when the user's prompt contains a MAG7 ticker.",
+      parameters: z
+        .object({
+          ticker: z.string().describe("Ticker symbol to fetch summary for"),
+        })
+        .strict(),
+      execute: async ({ ticker }, { abortSignal }) => {
+        const res = await fetch(`${baseUrl}/api/summary`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken, ticker }),
+          signal: abortSignal,
+        });
+        if (!res.ok) {
+          throw new Error(`Error fetching summary for ticker ${ticker}`);
+        }
+        return res.json();
+      },
+    });
 
     const { textStream, steps } = streamText({
       model: aisdkOpenai("gpt-4"),
       messages: [systemMessage, ...messages],
-      // tools: { fetchSummary: fetchSummaryTool },
+      tools: { fetchSummary: fetchSummaryTool },
+      maxSteps: 5,
+      onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
+        console.log("Step finished:", { text, toolCalls, toolResults });
+      },
     });
 
-    // set up streaming response headers
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-				console.log("ReadableStream start() callback invoked")
         try {
-          for await (const text of textStream) {
-            controller.enqueue(encoder.encode(text));
+          for await (const chunk of textStream) {
+            controller.enqueue(encoder.encode(chunk));
           }
           controller.close();
         } catch (err) {
@@ -92,9 +89,7 @@ Apologize profusely, and say that you only know about MAG7 tickers.`,
     console.error("Chat API error:", err);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
   }
 }

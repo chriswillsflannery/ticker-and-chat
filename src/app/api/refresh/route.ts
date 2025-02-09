@@ -21,7 +21,6 @@ export async function POST(request: Request) {
   );
 
   if (!apiRes.ok) {
-    // Optional: Remove cookies if refresh fails
     const response = NextResponse.json(
       { error: "Refresh failed" },
       { status: 401 },
