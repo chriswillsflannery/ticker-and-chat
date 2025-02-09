@@ -228,9 +228,9 @@ export default function DashboardUI() {
     );
 
   return (
-    <div className={`${selectedView === 'keystats' ? 'min-h-screen' : 'max-h-screen'} bg-background p-6 space-y-6`}>
+    <div className={`dash-container ${selectedView === 'keystats' ? 'min-h-screen p-6' : 'max-h-screen'} bg-background space-y-6`}>
       {error && <span>{error}</span>}
-      <div className={`${selectedView === 'chat' && 'h-[calc(100vh-220px)]'} max-w-[1200px] mx-auto space-y-6 border border-green-900`}>
+      <div className={`${selectedView === 'chat' && 'h-[calc(100vh-220px)]'} max-w-[1200px] mx-auto space-y-6`}>
         {selectedView === "keystats" && (
           <>
             <Select value={selectedTicker} onValueChange={setSelectedTicker}>
@@ -385,7 +385,7 @@ export default function DashboardUI() {
                 </Table>
               </Card>
             </TabsContent>
-            <TabsContent value="chat" className="border border-blue-900 h-full">
+            <TabsContent value="chat" className="h-full">
               <Chat />
             </TabsContent>
           </Tabs>

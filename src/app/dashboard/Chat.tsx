@@ -1,7 +1,9 @@
 import LoadingBubble from "@/components/LoadingBubble";
 import PromptSuggestionsRow from "@/components/PrompSuggestionsRow";
 import Bubble from "@/components/Bubble";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../util/axios";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,6 +14,12 @@ export const Chat = () => {
   const [conversation, setConversation] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+	const { accessToken } = useAuth();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,11 +38,12 @@ export const Chat = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+					"Authorization": `Bearer ${accessToken}`
         },
-        body: JSON.stringify({ messages: newMessages }),
+				body: JSON.stringify({ messages: newMessages })
       });
 
-      if (!response.ok || !response.body) {
+			if (!response.ok || !response.body) {
         throw new Error("Failed to fetch response");
       }
 
@@ -72,20 +81,23 @@ export const Chat = () => {
     setInput("");
   };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation, isLoading]);
+
   return (
-    <section className="border border-red-900">
-      <div className="messages h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
+    <section>
+      <div className="messages h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
         <div className="flex flex-col items-center px-4 py-6">
           {noMessages ? (
-            <>
-              <PromptSuggestionsRow handlePrompt={handlePromptClick} />
-            </>
+            <PromptSuggestionsRow handlePrompt={handlePromptClick} />
           ) : (
-            <div className="space-y-6 mb-8 w-full max-w-4xl">
+            <div className="space-y-6 w-full max-w-4xl">
               {conversation.map((message, idx) => {
                 return <Bubble key={`message-${idx}`} message={message} />;
               })}
               {isLoading && <LoadingBubble />}
+              <div ref={messagesEndRef} />
             </div>
           )}
         </div>
