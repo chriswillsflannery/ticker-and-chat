@@ -2,6 +2,8 @@ import { streamText, tool } from "ai";
 import { openai as aisdkOpenai } from "@ai-sdk/openai";
 import { z } from "zod";
 
+export const config = { runtime: "nodejs" }; // Use Node.js runtime to avoid timeout?
+
 const MAG7 = ["META", "AAPL", "GOOGL", "AMZN", "MSFT", "NVDA", "TSLA"];
 
 // check if vercel automatically sets this

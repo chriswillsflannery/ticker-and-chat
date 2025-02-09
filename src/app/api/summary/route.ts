@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const config = { runtime: "nodejs" }; // Use Node.js runtime to avoid timeout?
+
 export async function POST(req: NextRequest) {
   const { ticker, accessToken } = await req.json();
 
