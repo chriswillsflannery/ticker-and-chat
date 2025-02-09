@@ -66,6 +66,9 @@ interface TickerResponse {
 }
 
 export default function DashboardUI() {
+  const [selectedView, setSelectedView] = useState<"keystats" | "chat">(
+    "keystats",
+  );
   const [selectedTicker, setSelectedTicker] = useState<string>("META");
   const [tickerData, setTickerData] = useState<TickerResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -137,7 +140,7 @@ export default function DashboardUI() {
           <div className="h-96 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
-                data={tickerData.price_action}
+                data={tickerData?.price_action}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
                 <defs>
@@ -227,131 +230,165 @@ export default function DashboardUI() {
     <div className="min-h-screen bg-background p-6 space-y-6">
       {error && <span>{error}</span>}
       <div className="max-w-[1200px] mx-auto space-y-6">
-        <Select value={selectedTicker} onValueChange={setSelectedTicker}>
-          <SelectTrigger className="w-[300px]">
-            <SelectValue placeholder="Select a ticker" />
-          </SelectTrigger>
-          <SelectContent className="bg-background">
-            {MAG7_TICKERS.map((ticker) => (
-              <SelectItem
-                className="bg-background cursor-pointer"
-                key={ticker.value}
-                value={ticker.value}
-              >
-                {ticker.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {loading && <h3>Beautiful skeleton loaders coming soon...</h3>}
-        {tickerData && !loading && (
+        {selectedView === "keystats" && (
           <>
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 relative">
-                <Image
-                  src={
-                    tickerData.ticker_metadata.logo_url || "/placeholder.svg"
-                  }
-                  alt={`${tickerData.ticker_metadata.name} logo`}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{tickerData.ticker}</h1>
-                <p className="text-muted-foreground">
-                  {tickerData.ticker_metadata.tv_exchange}
-                </p>
-              </div>
-            </div>
+            <Select value={selectedTicker} onValueChange={setSelectedTicker}>
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Select a ticker" />
+              </SelectTrigger>
+              <SelectContent className="bg-background">
+                {MAG7_TICKERS.map((ticker) => (
+                  <SelectItem
+                    className="bg-background cursor-pointer"
+                    key={ticker.value}
+                    value={ticker.value}
+                  >
+                    {ticker.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-            <Tabs defaultValue="keystats" className="w-full">
-              <div className="relative">
-                <div className="absolute bottom-0 w-full h-[2px] bg-gray-200" />
-                <TabsList className="relative w-full bg-transparent flex justify-start">
-                  <TabsTrigger
-                    value="keystats"
-                    className="relative w-[100px] data-[state=active]:text-red-500 after:absolute after:bottom-[-5px] after:left-[-4] after:right-[-4] after:h-[4px] after:bg-red-500 data-[state=active]:after:block after:hidden"
-                  >
-                    Key Stats
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="chat"
-                    className="relative w-[100px] data-[state=active]:text-red-500 after:absolute after:bottom-[-5px] after:left-[-4] after:right-[-4] after:h-[4px] after:bg-red-500 data-[state=active]:after:block after:hidden"
-                  >
-                    Chat
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              <TabsContent value="keystats" className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground">
-                        Market Cap
-                      </p>
-                      <p className="text-2xl font-bold">
-                        {formatMarketCap(tickerData.ticker_metadata.market_cap)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground">Volume</p>
-                      <p className="text-2xl font-bold">
-                        {tickerData.price_action[
-                          tickerData.price_action.length - 1
-                        ].volume.toLocaleString()}
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground">Day Range</p>
-                      <p className="text-2xl font-bold">
-                        ${tickerData.price_action[0].low.toFixed(2)} - $
-                        {tickerData.price_action[0].high.toFixed(2)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground">
-                        Current Price
-                      </p>
-                      <p className="text-2xl font-bold">
-                        $
-                        {tickerData.price_action[
-                          tickerData.price_action.length - 1
-                        ].close.toFixed(2)}
-                      </p>
-                    </CardContent>
-                  </Card>
+            {loading && (
+              <h3>
+                Beautiful skeleton loaders coming soon...
+              </h3>
+            )}
+            {tickerData && !loading && (
+              <>
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 relative">
+                    <Image
+                      src={
+                        tickerData.ticker_metadata.logo_url ||
+                        "/placeholder.svg"
+                      }
+                      alt={`${tickerData.ticker_metadata.name} logo`}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold">
+                      {tickerData.ticker}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      {tickerData.ticker_metadata.tv_exchange}
+                    </p>
+                  </div>
                 </div>
-
-                <PriceChart />
-
-                <Card>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Link</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <SecFilings />
-                    </TableBody>
-                  </Table>
-                </Card>
-              </TabsContent>
-              <TabsContent value="chat">Chat with an Agent</TabsContent>
-            </Tabs>
+              </>
+            )}
           </>
         )}
+        <div
+          className={`${
+            selectedView === "chat"
+              ? "z-50 bg-background shadow-md"
+              : "relative"
+          } transition-all duration-500`}
+        >
+          <Tabs
+            defaultValue={selectedView}
+            onValueChange={(e) => setSelectedView(e)}
+            className="w-full"
+          >
+            <div className="relative mb-4">
+              <div className="absolute bottom-0 w-full h-[2px] bg-gray-200" />
+              <TabsList className="relative w-full bg-transparent flex justify-start">
+                <TabsTrigger
+                  value="keystats"
+                  className="relative w-[100px] data-[state=active]:text-red-500 after:absolute after:bottom-[-5px] after:left-[-4] after:right-[-4] after:h-[4px] after:bg-red-500 data-[state=active]:after:block after:hidden"
+                >
+                  Key Stats
+                </TabsTrigger>
+                <TabsTrigger
+                  value="chat"
+                  className="relative w-[100px] data-[state=active]:text-red-500 after:absolute after:bottom-[-5px] after:left-[-4] after:right-[-4] after:h-[4px] after:bg-red-500 data-[state=active]:after:block after:hidden"
+                >
+                  Chat
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent
+              value="keystats"
+              className="flex flex-col gap-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">
+                      Market Cap
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {formatMarketCap(
+                        tickerData?.ticker_metadata.market_cap ?? 0
+                      )}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">
+                      Volume
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {tickerData?.price_action[
+                        tickerData.price_action.length - 1
+                      ].volume.toLocaleString()}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">
+                      Day Range
+                    </p>
+                    <p className="text-2xl font-bold">
+                      $
+                      {tickerData?.price_action[0].low.toFixed(2)} - $
+                      {tickerData?.price_action[0].high.toFixed(2)}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">
+                      Current Price
+                    </p>
+                    <p className="text-2xl font-bold">
+                      $
+                      {tickerData?.price_action[
+                        tickerData?.price_action.length - 1
+                      ].close.toFixed(2)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <PriceChart />
+
+              <Card>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Link</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <SecFilings />
+                  </TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+            <TabsContent value="chat">
+              Chat with an Agent
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
