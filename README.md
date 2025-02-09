@@ -1,3 +1,7 @@
+.env
+NEXT_PUBLIC_API_URL= [python endpoint here]
+OPENAI_API_KEY= [api key here]
+
 # Developer's Notes
 
 **Auth - high level**
@@ -35,6 +39,10 @@ Let's make the chart the star of the show. Big, bold, unabashed.
 An obvious enhancement here would be to open some kind of socket connection to get real-time streaming data. But there are certainly some things here which can be easy perf enhancement grabs too, like caching images (maybe Next already does this behind the scenes?)
 
 This would also be a great place to think about some optimistic UI patterns. For example, when I select a new ticker from the dropdown, I shouldn't have to wait for the network query to complete - the new ticker value should immediately populate the "title".
+
+**Chatbot**
+
+The super latent `/summary` endpoint is a real doozy to work with. I can successfully chain tool calls locally, but when [I tried a vercel deployment here](https://ticker-and-chat.vercel.app/) the tool calls would just bomb out with no response or error. I _think_ it has something to do with Vercel/nodeJS timeout limits somewhere, so I tried switching the relevant Next routes from edge runtime to nodejs runtime, but that still bombed out. At this point, I'm running a little short on time. If I had to do this _for real_ I would look at some best practices in deployed examples and really pore over the ai sdk docs.
 
 # Caveats / weird things
 
