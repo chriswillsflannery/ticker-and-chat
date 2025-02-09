@@ -72,14 +72,55 @@ export const Chat = () => {
 
   const noMessages = !conversation || conversation.length === 0;
 
-  const handlePromptClick = (promptText: string) => {
-    const msg: Message = {
-      content: promptText,
-      role: "user",
-    };
-    setConversation([...conversation, msg]);
-    setInput("");
-  };
+	const handlePromptClick = async (promptText: string) => {
+		const msg: Message = {
+			role: "user",
+			content: promptText,
+		};
+	
+		const newMessages: Message[] = [...conversation, msg];
+		setConversation(newMessages);
+
+		setInput("");
+	
+		try {
+			setIsLoading(true);
+	
+			const response = await fetch("/api/chat", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ messages: newMessages, accessToken }),
+			});
+	
+			if (!response.ok || !response.body) {
+				throw new Error("Failed to fetch response");
+			}
+	
+			const reader = response.body.getReader();
+			const decoder = new TextDecoder();
+			let assistantMessage = "";
+	
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+	
+				const chunk = decoder.decode(value);
+				assistantMessage += chunk;
+	
+				setConversation([
+					...newMessages,
+					{ role: "assistant", content: assistantMessage },
+				]);
+			}
+		} catch (error) {
+			console.error("Error in handlePromptClick:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+	
 
   useEffect(() => {
     scrollToBottom();

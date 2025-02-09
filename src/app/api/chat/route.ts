@@ -73,7 +73,6 @@ Apologize profusely, and say that you only know about MAG7 tickers.`,
 				console.log("ReadableStream start() callback invoked")
         try {
           for await (const text of textStream) {
-						console.log(text)
             controller.enqueue(encoder.encode(text));
           }
           controller.close();
