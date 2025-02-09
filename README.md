@@ -1,6 +1,23 @@
-.env
+# Stock ticker with chatbot
+
+Application with NextJS, Tailwind, shadcn
+
+## How to / local development
+
+### install dependencies
+
+```bash
+install packages necessary for nextjs:
+in root folder:
+npm i
+
+run nextjs locally:
+npm run dev
+
+NOTE: You will need .env in root
 NEXT_PUBLIC_API_URL= [python endpoint here]
 OPENAI_API_KEY= [api key here]
+```
 
 # Developer's Notes
 
