@@ -208,10 +208,10 @@ export default function DashboardUI() {
           <TableRow key={index}>
             <TableCell>{new Date(filing.date).toLocaleDateString()}</TableCell>
             <TableCell>{filing.type}</TableCell>
-            <TableCell>{filing.description}</TableCell>
+            <TableCell className="max-w-[200px]">{filing.title}</TableCell>
             <TableCell>
               <a
-                href={filing.url}
+                href={filing.edgarUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
@@ -374,7 +374,7 @@ export default function DashboardUI() {
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Description</TableHead>
+                      <TableHead>Title</TableHead>
                       <TableHead>Link</TableHead>
                     </TableRow>
                   </TableHeader>
