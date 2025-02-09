@@ -29,6 +29,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "../util/axios";
 import { useAuth } from "../context/AuthContext";
+import { Chat } from './Chat'
 
 const MAG7_TICKERS = [
   { value: "META", label: "Meta Platforms Inc." },
@@ -86,7 +87,7 @@ export default function DashboardUI() {
           {
             data: { selectedTicker },
           },
-          {
+					{
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${accessToken}`,
@@ -227,9 +228,9 @@ export default function DashboardUI() {
     );
 
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
+    <div className={`${selectedView === 'keystats' ? 'min-h-screen' : 'max-h-screen'} bg-background p-6 space-y-6`}>
       {error && <span>{error}</span>}
-      <div className="max-w-[1200px] mx-auto space-y-6">
+      <div className={`${selectedView === 'chat' && 'h-[calc(100vh-220px)]'} max-w-[1200px] mx-auto space-y-6 border border-green-900`}>
         {selectedView === "keystats" && (
           <>
             <Select value={selectedTicker} onValueChange={setSelectedTicker}>
@@ -384,8 +385,8 @@ export default function DashboardUI() {
                 </Table>
               </Card>
             </TabsContent>
-            <TabsContent value="chat">
-              Chat with an Agent
+            <TabsContent value="chat" className="border border-blue-900 h-full">
+              <Chat />
             </TabsContent>
           </Tabs>
         </div>

@@ -24,7 +24,6 @@ export function useAxiosInterceptors({
     const requestInterceptor = api.interceptors.request.use(
       (config) => {
         if (accessToken) {
-          console.log('attaching AT: ', accessToken);
           config.headers.Authorization = `Bearer ${accessToken}`;
         }
         return config;
