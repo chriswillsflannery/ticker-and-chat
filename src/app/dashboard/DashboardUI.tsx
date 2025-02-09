@@ -77,8 +77,10 @@ interface TickerResponse {
 	};
 }
 
+type Tab = "keystats" | "chat"
+
 export default function DashboardUI() {
-  const [selectedView, setSelectedView] = useState<"keystats" | "chat">(
+  const [selectedView, setSelectedView] = useState<Tab>(
     "keystats",
   );
   const [selectedTicker, setSelectedTicker] = useState<string>("META");
@@ -302,7 +304,7 @@ export default function DashboardUI() {
         >
           <Tabs
             defaultValue={selectedView}
-            onValueChange={(e) => setSelectedView(e)}
+            onValueChange={(e) => setSelectedView(e as Tab)}
             className="w-full"
           >
             <div className="relative mb-4">
