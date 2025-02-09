@@ -38,9 +38,8 @@ export const Chat = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-					"Authorization": `Bearer ${accessToken}`
         },
-				body: JSON.stringify({ messages: newMessages })
+				body: JSON.stringify({ messages: newMessages, accessToken })
       });
 
 			if (!response.ok || !response.body) {
@@ -51,6 +50,7 @@ export const Chat = () => {
       const decoder = new TextDecoder();
       let assistantMessage = "";
 
+			setIsLoading(false) // nice to remove as soon as results start streaming in
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;

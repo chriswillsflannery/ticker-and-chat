@@ -16,6 +16,10 @@ The `useEffect` will fire inside of AuthContext any time a page is refreshed, ch
 
 Since the `access_token` is stored client-side only in memory, I don't have a great way of retrieving it from memory inside of an `axios request interceptor` hook. I don't think this is an issue though, because I _believe_ the python API will deny a request with 401 if the `access_token` is expired, and we can catch it on the way back in the `axios response interceptor` hook. I don't love this solution. It would be easy to get around all of this by just taking the easy way out and storing the `access_token` in browser memory, but that would defeat the purpose of having the access/refresh token paradigm. Maybe there is a better way to couple interceptors and client auth state by storing those in the same place, but I'm spending a lot of time on this, and need to move on to the financial dashboard UI.
 
+**auth addendum after writing chatbot**
+
+I went into this challenge pretty dogmatic on the paradigm of "access token should only be stored in memory". But now I think it might have been better to just stick the access token in an http-only cookie as well, because there are a bunch of server side operations calling other server side operations which need the access token. For example, when the chat ai pipeline needs to make a tool call to the /summary api. If all the auth checks were just simply happening server side, maybe all of the request/response intercept stuff could have just happened in NextJS middleware or something. Hindsight 20/20
+
 **Server-side authorization**
 
 I've used NextJS middleware to automatically re-route users to public and private routes respectively. This way, re-routing should feel "slick" (ie. the user should never see a "flicker" of the UI elements of the page the do not have access to.) One caveat here is that as a website grows, this can start to cause latency in "perceived" page load times because the re-routing is going on "behind the scenes". Something to bear in mind, and profile for in the future. The middleware ONLY handles redirects - any token refreshing happens client-side.

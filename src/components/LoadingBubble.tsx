@@ -1,16 +1,10 @@
 const LoadingBubble = () => {
   return (
-    <div
-      className="m-2 p-2 text-[15px] border-none text-foreground shadow-lg w-4/5 text-left animate-loading"
-      style={{
-        background: `
-                    no-repeat radial-gradient(circle closest-side, hsl(var(--foreground)) 90%, #0000) 0% 50%,
-                    no-repeat radial-gradient(circle closest-side, hsl(var(--foreground)) 90%, #0000) 50% 50%,
-                    no-repeat radial-gradient(circle closest-side, hsl(var(--foreground)) 90%, #0000) 100% 50%
-                `,
-        backgroundSize: "calc(100%/3) 100%",
-      }}
-    />
+    <div className="flex items-center justify-center gap-2 p-2 w-32 h-8 rounded-full bg-gray-900 text-gray-100 border-gray-700 shadow-lg">
+      <div className="w-2 h-2 rounded-full bg-white animate-bounce [animation-delay:-0.3s]" />
+      <div className="w-2 h-2 rounded-full bg-white animate-bounce [animation-delay:-0.15s]" />
+      <div className="w-2 h-2 rounded-full bg-white animate-bounce" />
+    </div>
   );
 };
 
