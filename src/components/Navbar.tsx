@@ -12,7 +12,7 @@ export default function Navbar() {
   }
   return (
     <nav className="flex items-center justify-between gap-4 py-4 px-12 absolute top-0 left-0 right-0">
-      <Link href="/dashboard" className="text-2xl font-bold">MorphyusAI</Link>
+      <Link href="/" className="text-2xl font-bold">MorphyusAI</Link>
       {isAuthenticated ? (
         <div className="flex items-center gap-4">
           <Button onClick={logout}>Logout</Button>

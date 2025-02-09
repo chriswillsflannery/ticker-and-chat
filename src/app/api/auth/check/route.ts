@@ -29,6 +29,19 @@ export async function POST(request: Request) {
   // But I don't have the secret key which the jwt was signed with on the python server.
   const decodedToken = jwt.decode(refreshToken.value) as jwt.JwtPayload;
 
+  // check if decodedToken is expired
+  const isValidToken = refreshToken && decodedToken && 
+  decodedToken.exp && decodedToken.exp > Math.floor(Date.now() / 1000);
+
+  if (!isValidToken) {
+    cookieStore.delete('refresh_token')
+    return NextResponse.json({
+      isAuthenticated: false,
+      isAdmin: false,
+      refreshToken: null,
+    })
+  }
+
   return NextResponse.json({
     isAuthenticated: false,
     isAdmin: decodedToken.sub === "admin_user",
