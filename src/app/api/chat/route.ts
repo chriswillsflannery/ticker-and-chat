@@ -4,6 +4,7 @@ import { z } from "zod";
 
 const MAG7 = ["META", "AAPL", "GOOGL", "AMZN", "MSFT", "NVDA", "TSLA"];
 
+// check if vercel automatically sets this
 export async function POST(req: Request) {
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
