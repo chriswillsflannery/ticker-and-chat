@@ -11,10 +11,10 @@ const MAG7 = ["META", "AAPL", "GOOGL", "AMZN", "MSFT", "NVDA", "TSLA"];
 // check if vercel automatically sets this
 export async function POST(req: Request) {
   console.log("POST request received");
-  let baseUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  let baseUrl = `${process.env.NEXT_PUBLIC_VERCEL_URL}`;
 
   if (baseUrl.length < HTTPS_LEN) {
-    baseUrl = `https://${process.env.VERCEL_URL}`;
+    baseUrl = `${process.env.VERCEL_URL}`;
   }
 
   if (baseUrl.length < HTTPS_LEN) {
