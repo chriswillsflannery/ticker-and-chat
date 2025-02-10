@@ -9,13 +9,16 @@ const MAG7 = ["META", "AAPL", "GOOGL", "AMZN", "MSFT", "NVDA", "TSLA"];
 
 // check if vercel automatically sets this
 export async function POST(req: Request) {
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NODE_ENV === "development"
-      ? "http://localhost:3000"
-      : "";
+  let baseUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  if (baseUrl.length < 8) {
+    baseUrl = `https://${process.env.VERCEL_URL}`;
+  }
+  if (baseUrl.length < 8) {
+    baseUrl =
+      process.env.NODE_ENV === "development" ? "http://localhost:3000" : "";
+  }
 
-	console.log('baseUrl: ', baseUrl)
+  console.log("baseUrl: ", baseUrl);
 
   try {
     const { messages, accessToken } = await req.json();
@@ -48,7 +51,7 @@ If the prompt mentions any ticker outside of [${MAG7.join(
         })
         .strict(),
       execute: async ({ ticker }, { abortSignal }) => {
-				console.log('attempting tool call: ', `${baseUrl}/api/summary`);
+        console.log("attempting tool call: ", `${baseUrl}/api/summary`);
         const res = await fetch(`${baseUrl}/api/summary`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

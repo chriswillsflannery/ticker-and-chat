@@ -65,6 +65,8 @@ The super latent `/summary` endpoint is a real doozy to work with. I can spin th
 
 I didn't have time to implement caching but that would be an obvious enhancement. [It seems like that's pretty straightforward to implement.](https://sdk.vercel.ai/docs/advanced/caching). One thing worth mentioning is that the response from the tool call exceeded the total token limit for the entirety of the gpt-4 context window (lol) so I just chose to only extract the `agent_summary`. If we really needed more fields (like citations and sources etc.) we could extract just those fields we need. As the context window grows, we can make some calculated choices about which older messages we want to either truncate or summarize. This is something that can be looked at on a model-by-model basis and we can decide how to truncate/summarize most efficiently for that model's context limit etc.
 
+Addendum after testing with a personal OpenAI key - It's possible that OpenAI erroneously returns 200 OK on a tool call if your OpenAI account has a billing issue. Need to look into this further. I'll try [upping the max timeout in vercel.](https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes)
+
 # Caveats / weird things
 
 **NextJS auth proxy server**
