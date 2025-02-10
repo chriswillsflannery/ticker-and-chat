@@ -3,31 +3,42 @@ import { openai as aisdkOpenai } from "@ai-sdk/openai";
 import { z } from "zod";
 
 export const config = { runtime: "nodejs" }; // Use Node.js runtime to avoid timeout?
-export const maxDuration = 60; // function can run up to 60 sec
+export const maxDuration = 60;
 
+const HTTPS_LEN = 8;
 const MAG7 = ["META", "AAPL", "GOOGL", "AMZN", "MSFT", "NVDA", "TSLA"];
 
 // check if vercel automatically sets this
 export async function POST(req: Request) {
+  console.log("POST request received");
   let baseUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-  if (baseUrl.length < 8) {
+
+  if (baseUrl.length < HTTPS_LEN) {
     baseUrl = `https://${process.env.VERCEL_URL}`;
   }
-  if (baseUrl.length < 8) {
+
+  if (baseUrl.length < HTTPS_LEN) {
     baseUrl =
       process.env.NODE_ENV === "development" ? "http://localhost:3000" : "";
   }
 
   console.log("baseUrl: ", baseUrl);
-
   try {
-    const { messages, accessToken } = await req.json();
+    const body = await req.json();
+    console.log("Request body received:", {
+      messageCount: body.messages?.length,
+      hasAccessToken: !!body.accessToken,
+    });
+
+    const { messages, accessToken } = body;
     const latestMessage = messages[messages.length - 1]?.content || "";
+    console.log("Latest message:", latestMessage);
 
     // MAG7 tickers mentioned in user prompt
     const mentionedTickers = MAG7.filter((ticker) =>
       new RegExp(`\\b${ticker}\\b`, "i").test(latestMessage),
     );
+    console.log("Mentioned tickers:", mentionedTickers);
 
     const systemMessage = {
       role: "system",
@@ -51,7 +62,7 @@ If the prompt mentions any ticker outside of [${MAG7.join(
         })
         .strict(),
       execute: async ({ ticker }, { abortSignal }) => {
-        console.log("attempting tool call: ", `${baseUrl}/api/summary`);
+        console.log("Executing fetchSummary tool for ticker:", ticker);
         const res = await fetch(`${baseUrl}/api/summary`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -59,22 +70,31 @@ If the prompt mentions any ticker outside of [${MAG7.join(
           signal: abortSignal,
         });
         if (!res.ok) {
+          console.error(`Error fetching summary for ${ticker}:`, res.status);
           throw new Error(`Error fetching summary for ticker ${ticker}`);
         }
-        return res.json();
+        const data = await res.json();
+        console.log("Summary data received for ticker:", ticker, data);
+        return data;
       },
     });
 
+    console.log("Starting streamText...");
     const { textStream } = streamText({
       model: aisdkOpenai("gpt-4"),
       messages: [systemMessage, ...messages],
       tools: { fetchSummary: fetchSummaryTool },
       maxSteps: 5,
       onStepFinish({ text, toolCalls, toolResults }) {
-        console.log("Step finished:", { text, toolCalls, toolResults });
+        console.log("Step finished:", {
+          textLength: text?.length,
+          hasToolCalls: !!toolCalls?.length,
+          toolResultsCount: toolResults?.length,
+        });
       },
     });
 
+    console.log("Setting up ReadableStream...");
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -82,13 +102,16 @@ If the prompt mentions any ticker outside of [${MAG7.join(
           for await (const chunk of textStream) {
             controller.enqueue(encoder.encode(chunk));
           }
+          console.log("Stream complete, closing controller");
           controller.close();
         } catch (err) {
+          console.error("Stream processing error:", err);
           controller.error(err);
         }
       },
     });
 
+    console.log("Returning streaming response...");
     return new Response(stream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
