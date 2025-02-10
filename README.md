@@ -35,11 +35,13 @@ The `useEffect` will fire inside of AuthContext any time a page is refreshed, ch
 
 **Why not handle the refresh check in a request intercept?**
 
-Since the `access_token` is stored client-side only in memory, I don't have a great way of retrieving it from memory inside of an `axios request interceptor` hook. I don't think this is an issue though, because I _believe_ the python API will deny a request with 401 if the `access_token` is expired, and we can catch it on the way back in the `axios response interceptor` hook. I don't love this solution. It would be easy to get around all of this by just taking the easy way out and storing the `access_token` in browser memory, but that would defeat the purpose of having the access/refresh token paradigm. Maybe there is a better way to couple interceptors and client auth state by storing those in the same place, but I'm spending a lot of time on this, and need to move on to the financial dashboard UI.
+Since the `access_token` is stored client-side only in memory, the best way I could think of to make it accessible to the axios request/response interceptors was to wrap the axios stuff in a big react hook, and then try to keep that synchronized with AuthContext. This still feels code smelly/bloated to me, but the general idea is that we intercept outgoing requests and attach the access token, and if it comes back 401, we intercept that, and we know that the access token expired, so we use the refresh token to get a new one.
+
+It would be easy to get around all of this by just taking the easy way out and storing the `access_token` in browser memory, but that would kinda defeat the purpose of having the access/refresh token paradigm. Maybe there is a better way to couple interceptors and client auth state by storing those in the same place like in some kind of singleton class, but I'm spending a lot of time on this, and need to move on to the financial dashboard UI.
 
 **auth addendum after writing chatbot**
 
-I went into this challenge pretty dogmatic on the paradigm of "access token should only be stored in memory". But now I think it might have been better to just stick the access token in an http-only cookie as well, because there are a bunch of server side operations calling other server side operations which need the access token. For example, when the chat ai pipeline needs to make a tool call to the /summary api. If all the auth checks were just simply happening server side, maybe all of the request/response intercept stuff could have just happened in NextJS middleware or something. Hindsight 20/20
+I went into this challenge pretty dogmatic on the paradigm of "access token should only be stored in-memory". But now I think it might have been better to just stick the access token in an http-only cookie as well, because there are a bunch of server side operations calling other server side operations which need the access token. For example, when the chat ai pipeline needs to make a tool call to the /summary api. If all the auth checks were just simply happening server side, maybe all of the request/response intercept stuff could have just happened in NextJS middleware or something. Hindsight 20/20
 
 **Server-side authorization**
 
@@ -59,7 +61,9 @@ This would also be a great place to think about some optimistic UI patterns. For
 
 **Chatbot**
 
-The super latent `/summary` endpoint is a real doozy to work with. I can successfully chain tool calls locally, but when [I tried a vercel deployment here](https://ticker-and-chat.vercel.app/) the tool calls would just bomb out with no response or error. I _think_ it has something to do with Vercel/nodeJS timeout limits somewhere, so I tried switching the relevant Next routes from edge runtime to nodejs runtime, but that still bombed out. At this point, I'm running a little short on time. If I had to do this _for real_ I would look at some best practices in deployed examples and really pore over the ai sdk docs.
+The super latent `/summary` endpoint is a real doozy to work with. I can spin the app up locally in development mode and successfully chain tool calls, but when [I tried a vercel deployment here](https://ticker-and-chat.vercel.app/) the tool calls would just bomb out with no response or error. I _think_ it has something to do with Vercel/nodeJS timeout limits somewhere, so I tried switching the relevant Next routes from edge runtime to nodejs runtime, but that still bombed out. At this point, I'm running a little short on time. If I had to do this _for real_ I would look at some best practices in deployed examples and really pore over the ai sdk docs. It seems that general best practices in this situation are to try and do something where the tool call is running as a background job, and the server just starts streaming in some preliminary model-generated text relevant to your query while that is finishing, so the UI at least has the perception of something happening.
+
+I didn't have time to implement caching but that would be an obvious enhancement. [It seems like that's pretty straightforward to implement.](https://sdk.vercel.ai/docs/advanced/caching). One thing worth mentioning is that the response from the tool call exceeded the total token limit for the entirety of the gpt-4 context window (lol) so I just chose to only extract the `agent_summary`. If we really needed more fields (like citations and sources etc.) we could extract just those fields we need. As the context window grows, we can make some calculated choices about which older messages we want to either truncate or summarize. This is something that can be looked at on a model-by-model basis and we can decide how to truncate/summarize most efficiently for that model's context limit etc.
 
 # Caveats / weird things
 
@@ -87,4 +91,6 @@ All tickers seem to have a lot of the same metadata (get it? Meta? data? ha) inc
 
 ---
 
-For a weekend of hacking, I'm satisfied with this. It's messy, and there are likely some edge cases yet to be discovered. I would NOT ship this as-is in production - I would like to more thoroughly look at how solutions like `BetterAuth` handle all of the edge cases first.
+For a weekend of hacking, I'm satisfied with this. It's messy, and there are likely some edge cases yet to be discovered. I would NOT ship this as-is in production. I would like to more thoroughly look at how solutions like `BetterAuth` handle all of the edge cases first. I would also like to more deeply read and understand the ai-sdk docs, as there are likely a lot of best practices I'm unaware of (this was my first time attempting to build anything that does tool calls).
+
+Thanks! This was fun. Learned a lot.
