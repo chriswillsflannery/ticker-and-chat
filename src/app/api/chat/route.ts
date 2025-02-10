@@ -3,6 +3,7 @@ import { openai as aisdkOpenai } from "@ai-sdk/openai";
 import { z } from "zod";
 
 export const config = { runtime: "nodejs" }; // Use Node.js runtime to avoid timeout?
+export const maxDuration = 60; // function can run up to 60 sec
 
 const MAG7 = ["META", "AAPL", "GOOGL", "AMZN", "MSFT", "NVDA", "TSLA"];
 

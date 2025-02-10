@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const config = { runtime: "nodejs" }; // Use Node.js runtime to avoid timeout?
+export const maxDuration = 60; // function can run up to 60 sec
 
 export async function POST(req: NextRequest) {
+	console.log('inside of /summary route')
   const { ticker, accessToken } = await req.json();
 
   if (!ticker) {
@@ -20,6 +22,9 @@ export async function POST(req: NextRequest) {
   }
 
   const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/challenge/api/summary/${ticker}`;
+
+	console.log('checking apiUrl: ', apiUrl);
+	console.log('with authToken ', accessToken);
 
   try {
     const externalResponse = await fetch(apiUrl, {
