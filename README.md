@@ -94,3 +94,8 @@ All tickers seem to have a lot of the same metadata (get it? Meta? data? ha) inc
 For a weekend of hacking, I'm satisfied with this. It's messy, and there are likely some edge cases yet to be discovered. I would NOT ship this as-is in production. I would like to more thoroughly look at how solutions like `BetterAuth` handle all of the edge cases first. I would also like to more deeply read and understand the ai-sdk docs, as there are likely a lot of best practices I'm unaware of (this was my first time attempting to build anything that does tool calls).
 
 Thanks! This was fun. Learned a lot.
+
+![Splash](https://github.com/chriswillsflannery/ticker-and-chat/blob/main/public/splash.png)
+![Login](https://github.com/chriswillsflannery/ticker-and-chat/blob/main/public/login.png)
+![Stats](https://github.com/chriswillsflannery/ticker-and-chat/blob/main/public/stats.png)
+![Chat](https://github.com/chriswillsflannery/ticker-and-chat/blob/main/public/chat.png)
